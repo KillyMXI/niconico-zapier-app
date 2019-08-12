@@ -120,7 +120,8 @@ module.exports = {
         key: 'sort_desc',
         type: 'boolean',
         label: 'Sort in descending order',
-        default: 'true'
+        required: true,
+        default: 'yes'
       },
       {
         key: '_limit',
@@ -134,7 +135,7 @@ module.exports = {
         key: '_context',
         label: 'Usage context',
         required: true,
-        helpText: 'Your service or application - specify your usage. Max 40 characters.'
+        helpText: 'Tell Niconico what you use it for. As specific as you can fit into the maximum of 40 characters.'
       },
 
     ],

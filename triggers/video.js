@@ -73,7 +73,7 @@ module.exports = {
         type: 'string',
         required: true,
         label: 'Search Query',
-        description: 'Add quotes for exact match. Use OR to search either of words. Use - to exclude a word.'
+        helpText: 'Add quotes for exact match. Use `OR` to search either of words. Use `-` to exclude a word.'
       },
       {
         key: 'targets',

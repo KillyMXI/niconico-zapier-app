@@ -1,6 +1,7 @@
 
 const UserSearch = require('../searches/user');
 const htmlToText = require('html-to-text');
+const version = require('../package.json').version;
 
 function divMod(x, y) { const m = x % y; return [(x - m) / y, m]; }
 function doubleDigit(n) { return String(n).padStart(2, '0'); }
@@ -16,6 +17,9 @@ function printableTime(s) {
 const triggerVideo = (z, bundle) => {
   return z.request({
     url: 'https://api.search.nicovideo.jp/api/v2/{{bundle.inputData.service}}/contents/search',
+    headers: {
+      'User-Agent': `Zapier.com Niconico custom app ${version}`
+    },
     params: {
       q:        bundle.inputData.q,
       targets:  bundle.inputData.targets,

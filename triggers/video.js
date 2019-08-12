@@ -120,7 +120,7 @@ module.exports = {
         key: 'sort_desc',
         type: 'boolean',
         label: 'Sort in descending order',
-        default: true
+        default: 'true'
       },
       {
         key: '_limit',
@@ -128,7 +128,7 @@ module.exports = {
         label: 'Limit',
         required: true,
         helpText: 'Maximum number of items. Up to 100.',
-        default: 10
+        default: '10'
       },
       {
         key: '_context',

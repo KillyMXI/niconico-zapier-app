@@ -13,7 +13,6 @@ describe('My App', () => {
       q: 'StrikeVector OR "Strike Vector"',
       targets: 'title,description,tags',
       _sort: 'startTime',
-      sort_desc: true,
       _limit: 10,
       _context: 'zapier.com integration test'
     }};

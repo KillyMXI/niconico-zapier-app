@@ -23,7 +23,7 @@ const triggerVideo = (z, bundle) => {
     params: {
       q:        bundle.inputData.q,
       targets:  bundle.inputData.targets,
-      _sort:   (bundle.inputData.sort_desc ? '-' : '') + bundle.inputData._sort,
+      _sort:    '-' + bundle.inputData._sort,
       _limit:   bundle.inputData._limit,
       _context: bundle.inputData._context,
       fields:   'contentId,userId,title,description,tags,categoryTags,thumbnailUrl,startTime,viewCounter,commentCounter' + (
@@ -98,8 +98,6 @@ module.exports = {
           required: true,
           label: 'Sort by',
           choices: {
-            viewCounter: 'Views counter',
-            commentCounter: 'Comments counter',
             //startTime: 'Video post time or live start time'
           },
           default: 'startTime'
@@ -107,8 +105,6 @@ module.exports = {
         if (bundle.inputData.service === 'video') {
           Object.assign(sortField.choices, {
             startTime: 'Video post time',
-            mylistCounter: 'My Lists counter',
-            lengthSeconds : 'Video duration',
             lastCommentTime: 'Time of last comment'
           });
         } else /* live */ {
@@ -119,13 +115,6 @@ module.exports = {
           });
         }
         return [sortField];
-      },
-      {
-        key: 'sort_desc',
-        type: 'boolean',
-        label: 'Sort in descending order',
-        required: true,
-        default: 'yes'
       },
       {
         key: '_limit',

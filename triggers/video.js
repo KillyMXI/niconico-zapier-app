@@ -38,7 +38,7 @@ const triggerVideo = (z, bundle) => {
     .then(videos => videos.map(video => {
       video.id = video.contentId;
       video.url = 'https://nico.ms/' + video.contentId;
-      video.user = z.dehydrate(UserSearch.operation.perform, { userId: video.userId });
+      video.user = z.dehydrate(UserSearch.operation.perform, { user_id: video.userId });
       video.descriptionMarkdown =
         htmlToText.fromString(video.description, { hideLinkHrefIfSameAsText: true, wordwrap: false, preserveNewlines: true })
           .split('"').join('\\"')

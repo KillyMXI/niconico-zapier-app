@@ -16,6 +16,7 @@ describe('My App', () => {
         result.should.have.property('id');
         result.should.have.property('nickname');
         result.should.have.property('thumbnail_url');
+        result.should.have.property('url');
         result.id.should.be.equal('383484');
         done();
       })

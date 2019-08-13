@@ -12,6 +12,7 @@ const searchUser = (z, bundle) => {
     .then(user => {
       user.nickname = decodeURIComponent(user.nickname);
       user.thumbnail_url = decodeURIComponent(user.thumbnail_url);
+      user.url = 'https://www.nicovideo.jp/user/' + user.id;
       return user;
     });
 };
@@ -34,7 +35,8 @@ module.exports = {
     sample: {
       id: '383484',
       nickname: '週刊ファミ通編集部',
-      thumbnail_url: 'http://dcdn.cdn.nimg.jp/nicoaccount/usericon/38/383484.jpg?1399546681'
+      thumbnail_url: 'http://dcdn.cdn.nimg.jp/nicoaccount/usericon/38/383484.jpg?1399546681',
+      url: 'https://www.nicovideo.jp/user/383484'
     },
 
     outputFields: []

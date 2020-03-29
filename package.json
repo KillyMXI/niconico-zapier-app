@@ -1,6 +1,6 @@
 {
   "name": "zapier-app-niconico",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Niconico video trigger for Zapier platform.",
   "repository": "https://github.com/KillyMXI/niconico-zapier-app",
   "homepage": "https://github.com/KillyMXI/niconico-zapier-app",
@@ -15,12 +15,12 @@
     "npm": ">=5.6.0"
   },
   "dependencies": {
-    "zapier-platform-core": "8.2.1",
-    "html-to-text": "^5.1.1"
+    "zapier-platform-core": "9.2.0",
+    "@mxiii/html-to-text": "^5.2.2"
   },
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "mocha": "^6.2.0",
+    "@types/mocha": "^7.0.2",
+    "mocha": "^7.1.1",
     "should": "^13.2.3"
   }
 }

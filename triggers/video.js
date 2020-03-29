@@ -1,6 +1,6 @@
 
 const UserSearch = require('../searches/user');
-const htmlToText = require('html-to-text');
+const htmlToText = require('@mxiii/html-to-text');
 const version = require('../package.json').version;
 
 function divMod(x, y) { const m = x % y; return [(x - m) / y, m]; }

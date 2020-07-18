@@ -59,7 +59,7 @@ module.exports = {
 
   display: {
     label: 'New Video or Live',
-    description: 'Triggers on a new video or live stream.'
+    description: 'Triggers when there is a new video or live stream.'
   },
 
   operation: {

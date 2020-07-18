@@ -6,7 +6,9 @@ const App = require('../../index');
 const appTester = zapier.createAppTester(App);
 zapier.tools.env.inject();
 
-describe('My App', () => {
+describe('My App', function () {
+  this.timeout(5000);
+
   it('should run triggers.video', done => {
     const bundle = { inputData: {
       service: 'video',

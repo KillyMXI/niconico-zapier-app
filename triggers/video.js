@@ -1,6 +1,6 @@
 
 const UserSearch = require('../searches/user');
-const htmlToText = require('@mxiii/html-to-text');
+const { htmlToText } = require('html-to-text');
 const version = require('../package.json').version;
 
 function divMod(x, y) { const m = x % y; return [(x - m) / y, m]; }
@@ -40,7 +40,13 @@ const triggerVideo = (z, bundle) => {
       video.url = 'https://nico.ms/' + video.contentId;
       video.user = z.dehydrate(UserSearch.operation.perform, { user_id: video.userId });
       video.descriptionMarkdown =
-        htmlToText.fromString(video.description, { hideLinkHrefIfSameAsText: true, wordwrap: false, preserveNewlines: true })
+        htmlToText(video.description, {
+          wordwrap: false,
+          preserveNewlines: true,
+          tags: {
+            'a': { options: { hideLinkHrefIfSameAsText: true } }
+          }
+        })
           .split('"').join('\\"')
           .split('\n').join('\\n')
           .replace(/\bseries\/\d{3,}\b/ig, '[$&](https://www.nicovideo.jp/$&)')

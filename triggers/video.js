@@ -1,5 +1,4 @@
 
-const UserSearch = require('../searches/user');
 const { htmlToText } = require('html-to-text');
 const version = require('../package.json').version;
 
@@ -16,7 +15,7 @@ function printableTime(s) {
 
 const triggerVideo = (z, bundle) => {
   return z.request({
-    url: 'https://api.search.nicovideo.jp/api/v2/{{bundle.inputData.service}}/contents/search',
+    url: 'https://api.search.nicovideo.jp/api/v2/snapshot/video/contents/search',
     headers: {
       'User-Agent': `Zapier.com Niconico custom app ${version}`
     },
@@ -26,11 +25,7 @@ const triggerVideo = (z, bundle) => {
       _sort:    '-' + bundle.inputData._sort,
       _limit:   bundle.inputData._limit,
       _context: bundle.inputData._context,
-      fields:   'contentId,userId,title,description,tags,categoryTags,thumbnailUrl,startTime,viewCounter,commentCounter' + (
-                  (bundle.inputData.service === 'video')
-                    ? ',mylistCounter,lengthSeconds,threadId,lastCommentTime,genre'
-                    : ',communityId,providerType,openTime,liveEndTime,communityText,communityIcon,memberOnly,liveStatus'
-                )
+      fields:   'contentId,title,description,tags,categoryTags,thumbnailUrl,startTime,viewCounter,commentCounter,mylistCounter,lengthSeconds,lastCommentTime,genre'
     }
   })
     .then(response => z.JSON.parse(response.content))
@@ -38,7 +33,6 @@ const triggerVideo = (z, bundle) => {
     .then(videos => videos.map(video => {
       video.id = video.contentId;
       video.url = 'https://nico.ms/' + video.contentId;
-      video.user = z.dehydrate(UserSearch.operation.perform, { user_id: video.userId });
       video.descriptionMarkdown =
         htmlToText(video.description, {
           wordwrap: false,
@@ -71,14 +65,6 @@ module.exports = {
   operation: {
     inputFields: [
       {
-        key: 'service',
-        required: true,
-        label: 'Service',
-        choices: { video: 'Video', live: 'Live' },
-        default: 'video',
-        altersDynamicFields: true
-      },
-      {
         key: 'q',
         type: 'string',
         required: true,
@@ -104,22 +90,14 @@ module.exports = {
           required: true,
           label: 'Sort by',
           choices: {
-            //startTime: 'Video post time or live start time'
+            //startTime: 'Video post time'
           },
           default: 'startTime'
         };
-        if (bundle.inputData.service === 'video') {
-          Object.assign(sortField.choices, {
-            startTime: 'Video post time',
-            lastCommentTime: 'Time of last comment'
-          });
-        } else /* live */ {
-          Object.assign(sortField.choices, {
-            startTime: 'Live start time',
-            openTime: 'Live open time',
-            liveEndTime: 'Live end time'
-          });
-        }
+        Object.assign(sortField.choices, {
+          startTime: 'Video post time',
+          lastCommentTime: 'Time of last comment'
+        });
         return [sortField];
       },
       {
@@ -152,7 +130,6 @@ module.exports = {
       viewCounter: 1285,
       providerType: 'channel',
       contentId: 'lv303615389',
-      userId: 383484,
       title: '【ロボゲー】ヘイ昇平のstrike vector EX【昼のSteam部】',
       memberOnly: false,
       commentCounter: 416,
@@ -161,7 +138,6 @@ module.exports = {
       liveStatus: 'past',
       id: 'lv303615389',
       url: 'https://nico.ms/lv303615389',
-      user: 'hydrate|||{"type":"method","method":"hydrators.userHydrator","bundle":{"userId":383484}}|||hydrate',
       descriptionMarkdown: '■番組内容\\nファミ通編集部のヘイ昇平の機材テストを兼ねた雑談枠\\n\\n\\n\\n\\n\\n■出演者\\nヘイ昇平（ファミ通）　https://twitter.com/heyshohei0411\\n\\n\\n\\n\\n■週刊ファミ通の読み放題サービス\\n月額864円で、ファミ通チャンネルに会員登録をすると、週刊ファミ通最新号の電子版読み放題サービスが楽しめます。１号あたり、なんと233円（※月4冊の場合）！　さらに会員限定のオマケ配信やブロマガ、プレゼントなどもあり。ぜひご登録ください！\\n\\n\\nファミ通チャンネル→http://ch.nicovideo.jp/famitsu\\n週刊ファミ通Twitter→https://twitter.com/weeklyfamitsu'
     },
 

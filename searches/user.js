@@ -8,7 +8,7 @@ const searchUser = (z, bundle) => {
     }
   })
     .then(response => z.JSON.parse(response.content))
-    .then(json => json.nicovideo_user_response.user)
+    .then(json => json.niconico_response.user)
     .then(user => {
       user.nickname = decodeURIComponent(user.nickname);
       user.thumbnail_url = decodeURIComponent(user.thumbnail_url);

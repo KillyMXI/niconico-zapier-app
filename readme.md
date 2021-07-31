@@ -8,6 +8,6 @@ I cannot make the app public on the <https://zapier.com/> platform since I have 
 
 * <https://site.nicovideo.jp/search-api-docs/snapshot> - documentation for the video search endpoint and TOS (in Japanese);
 
-* <https://github.com/ra-gg/node-nicovideo-api> - information about user info endpoint is borrowed from that project.
+* <https://github.com/ra-gg/node-nicovideo-api> - information about user info endpoint is borrowed from that project. (Response format is changed slightly since then.)
 
-Note: the [another version](https://site.nicovideo.jp/search-api-docs/search.html) of the search API was [discontinued](https://blog.nicovideo.jp/niconews/143630.html) at March 31st, 2021. There seem to be no way to get user ID for videos from the remaining search API.
+Note: [another version](https://site.nicovideo.jp/search-api-docs/search.html) of the search API was [discontinued](https://blog.nicovideo.jp/niconews/143630.html) at March 31st, 2021.

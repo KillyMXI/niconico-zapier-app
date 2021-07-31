@@ -28,6 +28,8 @@ describe('My App', function () {
           result.should.have.property('tags');
           result.should.have.property('viewCounter');
           result.should.have.property('contentId');
+          result.should.have.property('userId');
+          result.should.have.property('channelId');
           result.should.have.property('title');
           result.should.have.property('commentCounter');
           result.should.have.property('thumbnailUrl');

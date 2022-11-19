@@ -39,9 +39,9 @@ const triggerVideo = (z, bundle) => {
         htmlToText(video.description, {
           wordwrap: false,
           preserveNewlines: true,
-          tags: {
-            'a': { options: { hideLinkHrefIfSameAsText: true } }
-          }
+          selectors: [
+            { selector: 'a', options: { hideLinkHrefIfSameAsText: true } }
+          ]
         })
           .replace(/\bseries\/\d{5,}\b/ig, '[$&](https://www.nicovideo.jp/$&)')
           .replace(/\bmylist\/\d{5,}\b/ig, '[$&](https://www.nicovideo.jp/$&)')

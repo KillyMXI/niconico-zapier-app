@@ -11,7 +11,7 @@
     "test": "mocha --recursive"
   },
   "dependencies": {
-    "zapier-platform-core": "12.2.0",
+    "zapier-platform-core": "15.0.1",
     "html-to-text": "^8.2.1"
   },
   "devDependencies": {

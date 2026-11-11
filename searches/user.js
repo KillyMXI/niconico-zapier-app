@@ -1,23 +1,18 @@
-// find a particular user by id
-const searchUser = (z, bundle) => {
-  return z.request({
-    url: 'http://api.ce.nicovideo.jp/api/v1/user.info',
-    params: {
-      user_id: bundle.inputData.user_id,
-      __format: 'json'
-    }
-  })
-    .then(response => z.JSON.parse(response.content))
-    .then(json => json.niconico_response.user)
-    .then(user => {
-      user.nickname = decodeURIComponent(user.nickname);
-      user.thumbnail_url = decodeURIComponent(user.thumbnail_url);
-      user.url = 'https://www.nicovideo.jp/user/' + user.id;
-      return user;
-    });
+import { defineSearch } from 'zapier-platform-core';
+import { fetchUser } from '../niconico/api.js';
+
+// Searches return an array; an empty one means "not found".
+// A mapped user ID can be empty at run time; there is nothing to find then.
+const searchUser = async (z, bundle) => {
+  const userId = String(bundle.inputData.user_id ?? '').trim();
+  if (!userId) {
+    return [];
+  }
+  const user = await fetchUser(z, userId);
+  return user ? [user] : [];
 };
 
-module.exports = {
+export default defineSearch({
   key: 'user',
   noun: 'User',
 
@@ -28,17 +23,18 @@ module.exports = {
 
   operation: {
     inputFields: [
-      { key: 'user_id', required: true, helpText: 'Find the User with this user Id.' }
+      { key: 'user_id', label: 'User ID', required: true, helpText: 'Find the User with this Id.' }
     ],
     perform: searchUser,
 
     sample: {
       id: '383484',
       nickname: '週刊ファミ通編集部',
-      thumbnail_url: 'http://dcdn.cdn.nimg.jp/nicoaccount/usericon/38/383484.jpg?1399546681',
+      thumbnail_url: 'https://img.nicoprofile.nimg.jp/usericon/38/383484.jpg?1399546681',
+      follower_count: 50,
       url: 'https://www.nicovideo.jp/user/383484'
     },
 
     outputFields: []
   }
-};
+});

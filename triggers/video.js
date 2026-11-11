@@ -1,7 +1,11 @@
+import { defineTrigger } from 'zapier-platform-core';
+import { searchVideos } from '../niconico/api.js';
+import { descriptionToMarkdown } from '../niconico/description.js';
+import { channelUrl, userUrl, videoUrl } from '../niconico/urls.js';
+import hydrateUser from '../hydrators/user.js';
 
-const UserSearch = require('../searches/user');
-const { htmlToText } = require('html-to-text');
-const version = require('../package.json').version;
+// Zaps created before this option existed have no value, which means "on".
+const isOff = (value) => ['false', 'no'].includes(String(value).toLowerCase());
 
 function divMod(x, y) { const m = x % y; return [(x - m) / y, m]; }
 function doubleDigit(n) { return String(n).padStart(2, '0'); }
@@ -14,55 +18,38 @@ function printableTime(s) {
   return doubleDigit(h) + ':' + doubleDigit(mm) + ':' + doubleDigit(ss);
 }
 
-const triggerVideo = (z, bundle) => {
-  return z.request({
-    url: 'https://api.search.nicovideo.jp/api/v2/snapshot/video/contents/search',
-    headers: {
-      'User-Agent': `Zapier.com Niconico custom app ${version}`
-    },
-    params: {
-      q:        bundle.inputData.q,
-      targets:  bundle.inputData.targets,
-      _sort:    '-' + bundle.inputData._sort,
-      _limit:   bundle.inputData._limit,
-      _context: bundle.inputData._context,
-      fields:   'userId,channelId,contentId,title,description,tags,categoryTags,thumbnailUrl,startTime,viewCounter,commentCounter,mylistCounter,lengthSeconds,lastCommentTime,genre'
-    }
-  })
-    .then(response => z.JSON.parse(response.content))
-    .then(json => json.data)
-    .then(videos => videos.map(video => {
-      video.id = video.contentId;
-      video.url = 'https://nico.ms/' + video.contentId;
-      video.user = z.dehydrate(UserSearch.operation.perform, { user_id: video.userId });
-      video.descriptionMarkdown =
-        htmlToText(video.description, {
-          wordwrap: false,
-          preserveNewlines: true,
-          selectors: [
-            { selector: 'a', options: { hideLinkHrefIfSameAsText: true } }
-          ]
-        })
-          .replace(/\bseries\/\d{5,}\b/ig, '[$&](https://www.nicovideo.jp/$&)')
-          .replace(/\bmylist\/\d{5,}\b/ig, '[$&](https://www.nicovideo.jp/$&)')
-          .replace(/\bso\d{5,}\b/ig, '[$&](https://www.nicovideo.jp/watch/$&)')
-          .replace(/\bsm\d{5,}\b/ig, '[$&](https://nico.ms/$&)')
-          .split('"').join('\\"')
-          .split('\n').join('\\n');
-      if (video.lengthSeconds) {
-        video.duration = printableTime(video.lengthSeconds);
-      }
-      return video;
-    }));
+const escapeQuotesAndNewlines = (text) => text
+  .split('"').join('\\"')
+  .split('\n').join('\\n');
+
+// Everything from the search API as it is, followed by the fields this app adds.
+const toVideoOutput = (z, video, { includeUser }) => ({
+  ...video,
+  id: video.contentId,
+  url: videoUrl(video.contentId),
+  // Channel videos have a channel instead of a user.
+  ...(video.channelId != null && { channelUrl: channelUrl(video.channelId) }),
+  ...(video.userId != null && { userUrl: userUrl(video.userId) }),
+  ...(video.userId != null && includeUser && {
+    user: z.dehydrate(hydrateUser, { user_id: video.userId })
+  }),
+  descriptionMarkdown: escapeQuotesAndNewlines(descriptionToMarkdown(video.description)),
+  ...(video.lengthSeconds && { duration: printableTime(video.lengthSeconds) })
+});
+
+const triggerVideo = async (z, bundle) => {
+  const videos = await searchVideos(z, bundle.inputData);
+  const includeUser = !isOff(bundle.inputData.include_user);
+  return videos.map((video) => toVideoOutput(z, video, { includeUser }));
 };
 
-module.exports = {
+export default defineTrigger({
   key: 'video',
   noun: 'Video',
 
   display: {
-    label: 'New Video or Live',
-    description: 'Triggers when there is a new video or live stream.'
+    label: 'New Video',
+    description: 'Triggers when there is a new video.'
   },
 
   operation: {
@@ -87,21 +74,15 @@ module.exports = {
         },
         default: 'title,description,tags'
       },
-      function(z, bundle) {
-        let sortField = {
-          key: '_sort',
-          required: true,
-          label: 'Sort by',
-          choices: {
-            //startTime: 'Video post time'
-          },
-          default: 'startTime'
-        };
-        Object.assign(sortField.choices, {
+      {
+        key: '_sort',
+        required: true,
+        label: 'Sort by',
+        choices: {
           startTime: 'Video post time',
           lastCommentTime: 'Time of last comment'
-        });
-        return [sortField];
+        },
+        default: 'startTime'
       },
       {
         key: '_limit',
@@ -117,35 +98,51 @@ module.exports = {
         required: true,
         helpText: 'Tell Niconico what you use it for. As specific as you can fit into the maximum of 40 characters.'
       },
-
+      {
+        key: 'include_user',
+        type: 'boolean',
+        label: 'Include user details',
+        required: false,
+        default: 'true',
+        helpText: 'Look up the nickname and icon of the user who posted the video. The user ID and profile URL are included either way. The lookup uses an unofficial Niconico API, so turn this off if it stops working.'
+      }
     ],
     perform: triggerVideo,
 
+    // The shape matches a real response; the values are made up,
+    // except for the user, which is the one used in the live tests.
     sample: {
-      communityId: null,
-      openTime: '2017-07-27T14:05:12+09:00',
-      startTime: '2017-07-27T14:06:28+09:00',
-      description: '■番組内容<br />\r\n<font color="#0000ff" size="4">ファミ通編集部のヘイ昇平の機材テストを兼ねた雑談枠<br />\r\n<br />\r\n\r\n<br />\r\n</font><br />\r\n<br />\r\n<br />\r\n■出演者<br />\r\n<b>ヘイ昇平（ファミ通）　https://twitter.com/heyshohei0411</b><br />\r\n<br />\r\n<br />\r\n<br />\r\n<br />\r\n■週刊ファミ通の読み放題サービス<br />\r\n月額864円で、ファミ通チャンネルに会員登録をすると、週刊ファミ通最新号の電子版読み放題サービスが楽しめます。１号あたり、なんと233円（※月4冊の場合）！　さらに会員限定のオマケ配信やブロマガ、プレゼントなどもあり。ぜひご登録ください！<br />\r\n<br />\r\n<br />\r\nファミ通チャンネル→http://ch.nicovideo.jp/famitsu<br />\r\n週刊ファミ通Twitter→https://twitter.com/weeklyfamitsu<br />\r\n</font><br />',
-      communityIcon: 'https://secure-dcdn.cdn.nimg.jp/comch/channel-icon/128x128/ch2596352.jpg?1563170102',
-      tags: 'ゲーム 週刊ファミ通 ファミ通 テスト枠',
-      liveEndTime: '2017-07-27T15:04:14+09:00',
+      contentId: 'sm12345678',
+      title: 'Sample video title',
+      description: 'First line<br>Previous part: sm12345677',
+      tags: 'sample_tag another_tag',
       categoryTags: 'ゲーム',
-      viewCounter: 1285,
-      providerType: 'channel',
-      contentId: 'lv303615389',
+      genre: 'ゲーム',
+      contentType: 'long',
       userId: 383484,
-      title: '【ロボゲー】ヘイ昇平のstrike vector EX【昼のSteam部】',
-      memberOnly: false,
+      channelId: null,
+      thumbnailUrl: 'https://nicovideo.cdn.nimg.jp/thumbnails/12345678/12345678',
+      startTime: '2026-11-01T12:00:00+09:00',
+      lastCommentTime: '2026-11-02T18:30:00+09:00',
+      lengthSeconds: 312,
+      viewCounter: 1285,
       commentCounter: 416,
-      communityText: 'ファミ通チャンネル',
-      thumbnailUrl: 'https://nicolive.cdn.nimg.jp/live/simg/img/a412/1234931.b707fa.jpg',
-      liveStatus: 'past',
-      id: 'lv303615389',
-      url: 'https://nico.ms/lv303615389',
-      user: 'hydrate|||{"type":"method","method":"hydrators.userHydrator","bundle":{"userId":383484}}|||hydrate',
-      descriptionMarkdown: '■番組内容\\nファミ通編集部のヘイ昇平の機材テストを兼ねた雑談枠\\n\\n\\n\\n\\n\\n■出演者\\nヘイ昇平（ファミ通）　https://twitter.com/heyshohei0411\\n\\n\\n\\n\\n■週刊ファミ通の読み放題サービス\\n月額864円で、ファミ通チャンネルに会員登録をすると、週刊ファミ通最新号の電子版読み放題サービスが楽しめます。１号あたり、なんと233円（※月4冊の場合）！　さらに会員限定のオマケ配信やブロマガ、プレゼントなどもあり。ぜひご登録ください！\\n\\n\\nファミ通チャンネル→http://ch.nicovideo.jp/famitsu\\n週刊ファミ通Twitter→https://twitter.com/weeklyfamitsu'
+      mylistCounter: 12,
+      likeCounter: 34,
+      id: 'sm12345678',
+      url: 'https://nico.ms/sm12345678',
+      userUrl: 'https://www.nicovideo.jp/user/383484',
+      user: {
+        id: '383484',
+        nickname: '週刊ファミ通編集部',
+        thumbnail_url: 'https://img.nicoprofile.nimg.jp/usericon/38/383484.jpg?1399546681',
+        url: 'https://www.nicovideo.jp/user/383484',
+        follower_count: 50
+      },
+      descriptionMarkdown: 'First line\\nPrevious part: [sm12345677](https://nico.ms/sm12345677)',
+      duration: '05:12'
     },
 
     outputFields: []
   }
-};
+});

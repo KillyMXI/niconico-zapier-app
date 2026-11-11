@@ -1,9 +1,17 @@
-const VideoTrigger = require('./triggers/video');
-const UserSearch = require('./searches/user');
+import zapier, { defineApp } from 'zapier-platform-core';
+import packageJson from './package.json' with { type: 'json' };
+import VideoTrigger from './triggers/video.js';
+import UserSearch from './searches/user.js';
+import hydrateUser from './hydrators/user.js';
 
-const App = {
-  version: require('./package.json').version,
-  platformVersion: require('zapier-platform-core').version,
+export default defineApp({
+  version: packageJson.version,
+  platformVersion: zapier.version,
+
+  // Pass empty input values through as they are; the operations handle them.
+  flags: {
+    cleanInputData: false
+  },
 
   beforeRequest: [],
 
@@ -22,8 +30,6 @@ const App = {
   creates: {},
 
   hydrators: {
-    userHydrator: UserSearch.operation.perform
+    userHydrator: hydrateUser
   },
-};
-
-module.exports = App;
+});

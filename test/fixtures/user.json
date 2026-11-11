@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "status": 200
+  },
+  "data": {
+    "user": {
+      "id": 383484,
+      "nickname": "週刊ファミ通編集部",
+      "icons": {
+        "small": "https://img.nicoprofile.nimg.jp/usericon/38/383484.jpg?1399546681",
+        "large": "https://img.nicoprofile.nimg.jp/usericon/38/383484.jpg?1399546681"
+      },
+      "description": "",
+      "decoratedDescriptionHtml": "",
+      "strippedDescription": "",
+      "isPremium": false,
+      "registeredVersion": "(γ)",
+      "followeeCount": 0,
+      "followerCount": 50,
+      "userLevel": {
+        "currentLevel": 10,
+        "nextLevelThresholdExperience": 400,
+        "nextLevelExperience": 2300,
+        "currentLevelExperience": 356
+      },
+      "userChannel": null,
+      "isNicorepoReadable": true,
+      "sns": [],
+      "coverImage": null
+    },
+    "relationships": {
+      "sessionUser": {
+        "isFollowing": false
+      },
+      "isMe": false
+    }
+  }
+}
